@@ -51,7 +51,7 @@ access_configuration = {
 # valid variables available here: https://github.com/IdentityModel/oidc-client-js/wiki#usermanager
 
 access_token = None
-authenticate(provider)  # this changes global access_token (see note in README.md)
+authenticate(access_configuration)  # this changes global access_token (see note in README.md)
 ```
 
 At this point, you will be redirected to the authentication page of the identity provider declared

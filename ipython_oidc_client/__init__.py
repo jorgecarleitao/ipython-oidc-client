@@ -11,6 +11,15 @@ def _jupyter_server_extension_paths():
     }]
 
 
+def _jupyter_nbextension_paths():
+    return [{
+        "section": "notebook",
+        "src": "client",
+        "dest": "ipython_oidc_client",
+        "require": "ipython_oidc_client/main"
+    }]
+
+
 def authenticate(provider, global_variable='access_token'):
     my_comm = ipykernel.comm.Comm(target_name='oauth_authenticate')
 

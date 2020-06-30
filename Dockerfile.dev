@@ -1,0 +1,14 @@
+FROM python:3.7.4-buster
+
+# install jupyter notebooks
+RUN pip install jupyter
+
+EXPOSE 8888
+
+CMD SHELL=/bin/bash \
+    && cd project \
+    && pip install -e . \
+    && jupyter nbextension install ipython_oidc_client/client/ --symlink --user \
+    && jupyter nbextension enable client/main \
+    && jupyter serverextension enable --py ipython_oidc_client \
+    && jupyter notebook --allow-root --port 8888 --ip=0.0.0.0

@@ -9,8 +9,7 @@
         const REDIRECT_COOKIE = 'origin'
 
         window.addEventListener('load', function () {
-            const userManager = new Oidc.UserManager()
-            userManager.signinRedirectCallback().then(user => {
+            const redirect = () => {
                 // retrieve the cookie where we stored the origin (notebook) of the signin
                 const cookies = new UniversalCookie()
                 let path = cookies.get(REDIRECT_COOKIE)
@@ -21,8 +20,13 @@
 
                 // redirect back to the notebook
                 window.location.replace(path);
-            }).catch((error) => {
-                console.error(error);
+            }
+
+            const userManager = new Oidc.UserManager()
+            userManager.signinRedirectCallback().finally((error) => {
+                // redirect regardless. We need to improve error handling, as currently it provides
+                // no mechanism to tell the user what went wrong.
+                redirect()
             });
         })
     </script>

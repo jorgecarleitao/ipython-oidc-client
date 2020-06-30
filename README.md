@@ -4,21 +4,16 @@ A Jupyter extension to perform OAuth2 flows (e.g. token, code) in notebooks.
 
 ## Rational
 
-A major challenge in using APIs from notebooks is how to form the trust relationship between the API and the client (notebook).
+A major challenge in using APIs from notebooks is to form a trust relationship between the client (notebook)
+and the API.
 
-This problem is often solved by trusting the *host* of the kernel. One pattern to this is the managed identity pattern that all major cloud providers offer. A major disadvantage of this pattern is that any user that can access the execution engine (the kernel through a notebook), can also access whatever API that host has access to. I.e. it does not allow discrimatory access to APIs as it does not separate "access to notebooks" from "access to APIs". This generally leads
-to host-based access architectures with one execution environment per set of access policies.
+This problem is often solved by trusting the *host* of the kernel. The typical approach here is the managed identity pattern through a metadata service, that all major cloud providers offer. A major disadvantage of this pattern is that any user that can access the execution engine (the kernel through a notebook), can also access whatever API that host has access to. I.e. it does not allow discrimatory access to APIs as it does not separate "access to notebooks" from "access to APIs". This generally leads to host-based access architectures with one host per set of access policies. An aditional limitation of this pattern is that it incentivizes vendor lock-in, as it implies that the service needs to run on the vendor's infrastructure.
 
-Another pattern to solve this problem is to use a service principal (OAuth2) to access the API through a client secret. This unfortunatelly suffers from the same problems as the managed identity: it yields indiscrimatory access to the data to anyone with access to the execution engine. This pattern has another risk: in the context of a notebook, it is easy to programatically obtain the client secret, which gives an attacker indiscrimatory access to the API from *any host* in a zero trust network.
+Another pattern to solve this problem is to use a service principal (OAuth2) to access the API through a client secret. This unfortunatelly suffers from the same problems as the managed identity: it leads to indiscrimatory access to the API by anyone with access to the execution engine. This pattern has another risk: in the context of a notebook, it is easy to programatically obtain the client secret, which gives an attacker indiscrimatory access to the API from *any host* in a zero trust network.
 
 ### This package
 
-This package allows users to perform OAuth2 flows (e.g. token, code) in notebooks. This allows discrimatory access to APIs by individual users.
-
-This uses a standard pattern within the OAuth2 RFCs: the notebook is a client application (SPA) which interacts with the kernel, and users use OAuth2 to form a trust relationship between the kernel, APIs, and the identity provider.
-
-This allows decoupling authorization to the execution environment from authorization
-to APIs, allowing jupyterhub to be deployed on a whole organization, and use its identity provider (AD) to manage permissions to specific APIs that the user (e.g. developer) may need from a notebook.
+This package allows users to perform OAuth2 flows (e.g. token, code) in notebooks, thus considering a notebook, and consequently the kernel, as a client application with limited trust. This allows kernels to run on infrastructure without a metadata service, while at the same time maintaining high security standards.
 
 ## How to install
 
@@ -56,18 +51,18 @@ authenticate(access_configuration, token)  # this changes token (see note in REA
 At this point, you will be redirected to the authentication page of the identity provider declared
 in `authority`. Once authenticated (e.g. through MFA), you will be redirected back to the notebook.
 
-Once back to the notebook, re-run the cell above, and `token['access_token']` becomes the access token returned by the authority. Re-running the first cell does not trigger a new authentication; in fact, running that cell on any notebook on the same jupyterhub will yield the same access token.
+Once back in the notebook, re-run the cell above, and `token['access_token']` becomes the access token returned by the authority. Re-running the first cell does not trigger a new authentication; in fact, running that cell on any notebook on the same jupyterhub will yield the same access token.
 
 At this point, you can run e.g.
 
 ```
 import requests
-r = requests.get('...', headers={'Authorization': f'Bearer {token["access_token"]}'})
+r = requests.get('https://api....', headers={'Authorization': f'Bearer {token["access_token"]}'})
 ```
 
 Once the token expires (typically after 1 hour), re-run the cell above to get a new token.
 
-This procedure can be repeated for access tokens to multiple APIs within the same notebook, naturally.
+This procedure can be repeated for access tokens to multiple APIs within the same notebook.
 
 ### Why not returning the token?
 
@@ -96,7 +91,7 @@ This package has to deal with two execution environments:
 * javascript, on the browser
 * Python, on the kernel 
 
-On the browser, it uses [oidc-client-js(https://github.com/IdentityModel/oidc-client-js) to perform
+On the browser, it uses [oidc-client-js](https://github.com/IdentityModel/oidc-client-js) to perform
 the oauth2 flows. In Python, it uses this package's source code, which performs a redirect and communicates with the browser.
 
 The flow after running the example above is:
@@ -121,6 +116,13 @@ This package assumes that the kernel is less trustworthy than the browser. This 
 * share the notebook with someone
 
 These induce a risk of inadvertedly sharing tokens, in particular refresh tokens. To reduce this risk, the browser only shares access tokens with the kernel, which are extrictly necessary to communicate with an API.
+
+Another advantage of this pattern is that an attack on the kernel server requires significantly more effort to grant access to an API: a user needs to have printed its access token to a notebook and the attacker
+needs to access that notebook (privileged access) within the expiration date of the token (within 1 hour).This is in opposition to the metadata service, which is available to any process running on the host (see [AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html) and [Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#security)).
+
+### Browser trust
+
+The pattern used by this library has the same risks of a single page application, including secret exfiltration from the browser. This implies that auditing is required for any client-side code that jupyter delivers to end users, as to not exfiltrate tokens from the client.
 
 ## How to develop
 

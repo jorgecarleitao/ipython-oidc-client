@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/oidc-client/1.10.0/oidc-client.min.js"></script>
+    <script defer src="https://unpkg.com/universal-cookie@3/umd/universalCookie.min.js"></script>
+    <script type="application/javascript">
+        const REDIRECT_COOKIE = 'origin'
+
+        window.addEventListener('load', function () {
+            const userManager = new Oidc.UserManager()
+            userManager.signinRedirectCallback().then(user => {
+                // retrieve the cookie where we stored the origin (notebook) of the signin
+                const cookies = new UniversalCookie()
+                let path = cookies.get(REDIRECT_COOKIE)
+                if (path === undefined) {
+                    path = '/'
+                }
+                cookies.remove(REDIRECT_COOKIE);
+
+                // redirect back to the notebook
+                window.location.replace(path);
+            }).catch((error) => {
+                console.error(error);
+            });
+        })
+    </script>
+</head>
+
+<body>
+</body>
+
+</html>

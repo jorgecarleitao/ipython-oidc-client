@@ -1,6 +1,6 @@
 """A Jupyter extension to perform OAuth2 flows (e.g. token, code) in notebooks."""
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 import ipykernel.comm
 

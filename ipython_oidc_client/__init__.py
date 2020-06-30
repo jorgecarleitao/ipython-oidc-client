@@ -1,6 +1,6 @@
-"""A Jupyter extension to """
+"""A Jupyter extension to perform OAuth2 flows (e.g. token, code) in notebooks."""
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 import ipykernel.comm
 
@@ -20,11 +20,11 @@ def _jupyter_nbextension_paths():
     }]
 
 
-def authenticate(provider, global_variable='access_token'):
-    my_comm = ipykernel.comm.Comm(target_name='oauth_authenticate')
+def authenticate(provider, variable):
+    comm = ipykernel.comm.Comm(target_name='oauth_authenticate')
 
-    @my_comm.on_msg
+    @comm.on_msg
     def _recv(msg):
-        globals()[global_variable] = msg['content']['data']
+        variable['access_token'] = msg['content']['data']
 
-    my_comm.send(provider)
+    comm.send(provider)

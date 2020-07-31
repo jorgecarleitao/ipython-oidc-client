@@ -22,7 +22,7 @@ pip install ipython-oidc-client
 
 jupyter nbextension install --py ipython_oidc_client
 jupyter nbextension enable --py ipython_oidc_client
-jupyter serverextension enable --py ipyoauth_oidc_client
+jupyter serverextension enable --py ipython_oidc_client
 ```
 
 On your identity provider (e.g. Azure, Google, Auth0), add a reply url to the path `/redirect.html`,

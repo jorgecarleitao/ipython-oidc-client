@@ -39,7 +39,10 @@ define([
                     cookie.set(REDIRECT_COOKIE, window.location.pathname + window.location.search, {sameSite: 'lax', path: '/'})
                     return userManager.signinRedirect()
                 } else {
-                    return user['access_token']
+                    return {
+                        access_token: user['access_token'],
+                        id_token: user['id_token'],
+                    }
                 }
             })
         }

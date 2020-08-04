@@ -51,7 +51,9 @@ authenticate(access_configuration, token)  # this changes token (see note in REA
 At this point, you will be redirected to the authentication page of the identity provider declared
 in `authority`. Once authenticated (e.g. through MFA), you will be redirected back to the notebook.
 
-Once back in the notebook, re-run the cell above, and `token['access_token']` becomes the access token returned by the authority. Re-running the first cell does not trigger a new authentication; in fact, running that cell on any notebook on the same jupyterhub will yield the same access token.
+Once back in the notebook, re-run the cell above, and `token['access_token']` becomes the access token returned by the authority
+and `token['id_token']` the id token (`None`)
+Re-running the first cell does not trigger a new authentication; in fact, running that cell on any notebook on the same jupyterhub will yield the same access token.
 
 At this point, you can run e.g.
 

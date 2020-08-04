@@ -1,6 +1,6 @@
 """A Jupyter extension to perform OAuth2 flows (e.g. token, code) in notebooks."""
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 import ipykernel.comm
 
@@ -25,6 +25,7 @@ def authenticate(provider, variable):
 
     @comm.on_msg
     def _recv(msg):
-        variable['access_token'] = msg['content']['data']
+        variable['access_token'] = msg['content']['data'].get('access_token')
+        variable['id_token'] = msg['content']['data'].get('id_token')
 
     comm.send(provider)

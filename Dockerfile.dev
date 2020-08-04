@@ -7,7 +7,7 @@ EXPOSE 8888
 
 CMD SHELL=/bin/bash \
     && cd project \
-    && pip install -e . \
+    && pip install . \
     && jupyter nbextension install ipython_oidc_client/client/ --symlink --user \
     && jupyter nbextension enable client/main \
     && jupyter serverextension enable --py ipython_oidc_client \
